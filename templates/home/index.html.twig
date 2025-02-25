@@ -1,20 +1,96 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Knowledge{% endblock %}
 
 {% block body %}
 <style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+    }
+
+    .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Cela garantit que la page occupe toute la hauteur de l'écran */
+    }
+    header {
+        background-color: #384050;
+        padding: 20px 0;
+    }
+
+    header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .logo-link img {
+        width: 170px;
+        height: auto;
+    }
+
+    nav ul {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+    }
+
+    nav ul li {
+        display: inline-block;
+    }
+
+    nav ul li a {
+        color: #f1f8fc;
+        text-decoration: none;
+        font-size: 1.1rem;
+    }
+
+    nav ul li a:hover {
+        color: #0074c7;
+    }
+
+    main {
+        flex: 1; 
+        padding: 20px;
+        
+    }
 </style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+        <header>
+            <div class="container">
+                <div class="logo">
+                    <a href="/" class="logo-link"><img src="{{ asset('images/Logo.png') }}" alt="Logo"></a>
+                    
+                                   
+                </div>
+                <nav>
+                    <ul class="nav-links">
+                        {% if app.user is not null %}
+                            <li><a href="/">Accueil</a></li>
+                            <li><a href="/cursus">cursus</a></li>
+                            <li><a href="/cart">Panier</a></li>
+                            <li><a href="/logout">Se déconnecter</a></li>
+                        {% else %}
+                            <li><a href="/" >Accueil</a></li>
+                            <li><a href="/login">Se connecter</a></li>
+                            <li><a href="/register">S'inscrire</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/ivann/Knowledge/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>C:/Users/ivann/Knowledge/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+            </div>
+        </header>
 {% endblock %}
