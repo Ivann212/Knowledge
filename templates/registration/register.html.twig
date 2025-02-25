@@ -1,12 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Créer mon compte{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/register.css') }}">
+{% endblock %}
+
+
+
 
 {% block body %}
+
     {% for flash_error in app.flashes('verify_email_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
-
+<header>
+    <div class="container">
+        <div class="logo">
+            <a href="/" class="logo-link"><img src="{{ asset('images/Logo.png') }}" alt="Logo"></a>
+                    
+                                   
+        </div>
+        <nav>
+            <ul class="nav-links">
+                {% if app.user is not null %}
+                    <li><a href="/">Accueil</a></li>
+                    <li><a href="/cursus">cursus</a></li>
+                    <li><a href="/cart">Panier</a></li>
+                    <li><a href="/logout">Se déconnecter</a></li>
+                {% else %}
+                    <li><a href="/" >Accueil</a></li>
+                    <li><a href="/login">Se connecter</a></li>
+                    <li><a href="/register">S'inscrire</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
+<main>
     <h1>Register</h1>
 
     {{ form_errors(registrationForm) }}
@@ -19,4 +50,5 @@
 
         <button type="submit" class="btn">Register</button>
     {{ form_end(registrationForm) }}
+</main>
 {% endblock %}

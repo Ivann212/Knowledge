@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminController!{% endblock %}
+
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('styles/home.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/admin.css') }}">
 {% endblock %}
-{% block title %}Knowledge{% endblock %}
 
 {% block body %}
-
 <header>
     <div class="container">
         <div class="logo">
@@ -28,6 +29,10 @@
             </ul>
         </nav>
 
-     </div>
- </header>
+    </div>
+</header>
+<main>
+    <h1>Ajouter un Cursus</h1>
+
+</main>
 {% endblock %}

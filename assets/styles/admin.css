@@ -1,0 +1,55 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Cela garantit que la page occupe toute la hauteur de l'écran */
+}
+header {
+    background-color: #384050;
+    padding: 20px 0;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo-link img {
+    width: 170px;
+    height: auto;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav ul li {
+    display: inline-block;
+}
+
+nav ul li a {
+    color: #f1f8fc;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+nav ul li a:hover {
+    color: #0074c7;
+}
+
+main {
+    flex: 1; 
+    padding: 30px;
+    text-align: center;
+}
