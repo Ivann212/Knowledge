@@ -1,9 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AdminController!{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/formationAdd.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -18,7 +19,6 @@
             <ul class="nav-links">
                  {% if app.user is not null %}
                     <li><a href="/">Accueil</a></li>
-                     <li><a href="/cursus">cursus</a></li>
                      <li><a href="/cart">Panier</a></li>
                      <li><a href="/logout">Se déconnecter</a></li>
                  {% else %}
@@ -31,8 +31,20 @@
 
     </div>
 </header>
-<main>
-    <h1>Ajouter un Cursus</h1>
+<div class="container mt-4">
 
+<main>
+    <h1>Tableau de bord de l'Administration</h1>
+
+    <nav class="nav nav-pills flex-column">
+        <a class="nav-link" href="{{ path('admin_formations_add') }}">Ajouter une Formation</a>
+        <a class="nav-link" href="{{ path('admin_lessons_add') }}">Ajouter une leçon</a>
+        <a class="nav-link" href="{{ path('admin_users') }}">Gérer les utilisateurs</a>
+    </nav>
+
+    <div class="mt-4">
+        {% block admin_content %}{% endblock %}
+    </div>
 </main>
+
 {% endblock %}

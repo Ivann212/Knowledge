@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: LessonsRepository::class)]
+#[ORM\HasLifecycleCallbacks] 
 class Lessons
 {
     #[ORM\Id]
@@ -173,5 +174,18 @@ class Lessons
         }
 
         return $this;
+    }
+
+    /**
+     *
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function updatedTimestamps(): void
+    {
+        $this->setUpdatedAt(new \DateTimeImmutable('now'));
+        if ($this->getCreatedAt() === null) {
+            $this->setCreatedAt(new \DateTimeImmutable('now'));
+        }
     }
 }

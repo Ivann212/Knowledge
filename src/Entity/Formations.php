@@ -24,6 +24,10 @@ class Formations
     #[ORM\OneToMany(mappedBy: "formation", targetEntity: Lessons::class)]
     private Collection $lessons;
 
+    #[ORM\ManyToOne(targetEntity: Theme::class, inversedBy: 'formations')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Theme $theme = null;
+
     public function __construct()
     {
         $this->lessons = new ArrayCollection();
@@ -83,6 +87,17 @@ class Formations
             }
         }
 
+        return $this;
+    }
+
+    public function getTheme(): ?Theme
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(?Theme $theme): static
+    {
+        $this->theme = $theme;
         return $this;
     }
 }

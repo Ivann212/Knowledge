@@ -1,0 +1,23 @@
+{% extends 'admin/index.html.twig' %}
+
+{% block title %}Ajouter un Cursus{% endblock %}
+
+
+
+{% block admin_content %}
+
+<main>
+    <h2>Ajouter un nouveau cursus</h2>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_admin') }}" class="retour">Retour</a>
+</main>
+
+{% endblock %}
