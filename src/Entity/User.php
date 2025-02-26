@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,20 +24,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
     #[ORM\Column]
     private bool $isVerified = false;
+
+    #[ORM\OneToMany(mappedBy: "user", targetEntity: Purchases::class, cascade: ["persist", "remove"])]
+    private Collection $purchases;
+
+    #[ORM\OneToMany(mappedBy: "user", targetEntity: Progress::class, cascade: ["persist", "remove"])]
+    private Collection $progress;
+
+    #[ORM\OneToMany(mappedBy: "user", targetEntity: Certifications::class, cascade: ["persist", "remove"])]
+    private Collection $certifications;
+
+    public function __construct()
+    {
+        $this->purchases = new ArrayCollection();
+        $this->progress = new ArrayCollection();
+        $this->certifications = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -50,47 +62,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     *
-     * @return list<string>
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_ADMIN';
-
+        $roles[] = 'ROLE_USER'; // Ajoute un rôle par défaut
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->password;
@@ -99,17 +91,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 
     public function isVerified(): bool
@@ -120,7 +106,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+        return $this;
+    }
 
+    public function getPurchases(): Collection
+    {
+        return $this->purchases;
+    }
+
+    public function addPurchase(Purchases $purchase): static
+    {
+        if (!$this->purchases->contains($purchase)) {
+            $this->purchases->add($purchase);
+            $purchase->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removePurchase(Purchases $purchase): static
+    {
+        if ($this->purchases->removeElement($purchase)) {
+            if ($purchase->getUser() === $this) {
+                $purchase->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getProgress(): Collection
+    {
+        return $this->progress;
+    }
+
+    public function addProgress(Progress $progress): static
+    {
+        if (!$this->progress->contains($progress)) {
+            $this->progress->add($progress);
+            $progress->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeProgress(Progress $progress): static
+    {
+        if ($this->progress->removeElement($progress)) {
+            if ($progress->getUser() === $this) {
+                $progress->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getCertifications(): Collection
+    {
+        return $this->certifications;
+    }
+
+    public function addCertification(Certifications $certification): static
+    {
+        if (!$this->certifications->contains($certification)) {
+            $this->certifications->add($certification);
+            $certification->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeCertification(Certifications $certification): static
+    {
+        if ($this->certifications->removeElement($certification)) {
+            if ($certification->getUser() === $this) {
+                $certification->setUser(null);
+            }
+        }
         return $this;
     }
 }
