@@ -6,6 +6,7 @@ use App\Entity\Lessons;
 use App\Entity\Formations;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
@@ -21,6 +22,12 @@ class LessonsType extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Titre de la leçon',
                 'attr' => ['class' => 'form-control']
+            ])
+            ->add('price', MoneyType::class, [
+                'label' => 'Prix',
+                'attr' => ['class' => 'form-control'],
+                'scale' => 2, 
+                'required' => true, 
             ])
             // Lesson content
             ->add('content', TextType::class, [

@@ -19,14 +19,18 @@ class Lessons
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
+    private ?string $price = null;
+
     #[ORM\Column(length: 255)]
     private ?string $content = null;
 
     #[ORM\Column(length: 255)]
     private ?string $video_url = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeImmutable $created_at = null;
+
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
@@ -45,6 +49,10 @@ class Lessons
     {
         $this->progress = new ArrayCollection();
         $this->certifications = new ArrayCollection();
+        $this->created_at = new \DateTimeImmutable();
+        $this->updated_at = new \DateTimeImmutable();
+
+
     }
 
     public function getId(): ?int
@@ -60,6 +68,17 @@ class Lessons
     public function setTitle(string $title): static
     {
         $this->title = $title;
+        return $this;
+    }
+
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?string $price): static
+    {
+        $this->price = $price;
         return $this;
     }
 
@@ -184,8 +203,12 @@ class Lessons
     public function updatedTimestamps(): void
     {
         $this->setUpdatedAt(new \DateTimeImmutable('now'));
-        if ($this->getCreatedAt() === null) {
-            $this->setCreatedAt(new \DateTimeImmutable('now'));
+        if (!$this->created_at) {
+            $this->created_at = new \DateTimeImmutable();
         }
+        if (!$this->updated_at) {
+            $this->updated_at = new \DateTimeImmutable();
+        }
+        
     }
 }

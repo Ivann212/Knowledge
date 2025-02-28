@@ -20,6 +20,9 @@ class Theme
     #[ORM\OneToMany(mappedBy: 'theme', targetEntity: Formations::class, cascade: ['persist', 'remove'])]
     private Collection $formations;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->formations = new ArrayCollection();
@@ -38,6 +41,17 @@ class Theme
     public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 

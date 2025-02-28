@@ -19,7 +19,6 @@
             <ul class="nav-links">
                  {% if app.user is not null %}
                     <li><a href="/">Accueil</a></li>
-                     <li><a href="/cart">Panier</a></li>
                      <li><a href="/logout">Se déconnecter</a></li>
                  {% else %}
                      <li><a href="/" >Accueil</a></li>
@@ -37,6 +36,7 @@
     <h1>Tableau de bord de l'Administration</h1>
 
     <nav class="nav nav-pills flex-column">
+        <a href="{{ path('admin_theme_add') }}">Ajouter un Thème</a>
         <a class="nav-link" href="{{ path('admin_formations_add') }}">Ajouter une Formation</a>
         <a class="nav-link" href="{{ path('admin_lessons_add') }}">Ajouter une leçon</a>
         <a class="nav-link" href="{{ path('admin_users') }}">Gérer les utilisateurs</a>

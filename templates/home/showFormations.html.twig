@@ -1,0 +1,52 @@
+{% extends 'home/index.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/home.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/showFormations.css') }}">
+{% endblock %}
+{% block title %}Formations pour {{ theme.name }}{% endblock %}
+
+{% block body %}
+
+<header>
+    <div class="container">
+        <div class="logo">
+            <a href="/" class="logo-link"><img src="{{ asset('images/Logo.png') }}" alt="Logo"></a>
+                    
+                                   
+        </div>
+        <nav>
+            <ul class="nav-links">
+                 {% if app.user is not null %}
+                    <li><a href="/">Accueil</a></li>
+                    <li><a href="/logout">Se déconnecter</a></li>
+                 {% else %}
+                    <li><a href="/" >Accueil</a></li>
+                    <li><a href="/login">Se connecter</a></li>
+                    <li><a href="/register">S'inscrire</a></li>
+                 {% endif %}
+            </ul>
+        </nav>
+
+    </div>
+</header>
+<main>
+    <h1>Formations pour le thème : {{ theme.name }}</h1>
+    {% if formations is empty %}
+        <p>Aucune formation disponible pour ce thème.</p>
+    {% else %}
+        <div class="formations-container">
+            {% for formation in formations %}
+                <div class="formation-card">
+                    <img src="{{ asset('images/' ~ formation.image) }}" alt="Image de {{ formation.title }}" class="formation-image">
+                    <h2>{{ formation.title }}</h2>
+                    <p><strong>Prix :</strong> {{ formation.price }} €</p>
+                    {# <a href="{{ path('app_formation', {'id': formation.id}) }}">Voir la formation</a> #}
+                    <a href="{{ path('app_formations', {'id': formation.id}) }}" class="btn">Voir les leçons</a>
+                    <a class="btn">Acheter le cursus</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</main>
+{% endblock %}

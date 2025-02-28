@@ -1,0 +1,26 @@
+{% extends 'admin/index.html.twig' %}
+
+{% block title %}Ajouter un Thème{% endblock %}
+
+{% block admin_content %}
+{% for label, messages in app.flashes %}
+    <div class="alert alert-{{ label }}">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endfor %}
+
+<main>
+    <h2>Ajouter un nouveau thème</h2>
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.image) }}
+        {{ form_row(form.submit) }} 
+    {{ form_end(form) }}
+</main>
+{% endblock %}
+
+
+

@@ -1,0 +1,50 @@
+{% extends 'home/index.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/home.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/showFormations.css') }}">
+{% endblock %}
+{% block title %}Leçons pour {{ formation.title }}{% endblock %}
+
+{% block body %}
+
+<header>
+    <div class="container">
+        <div class="logo">
+            <a href="/" class="logo-link"><img src="{{ asset('images/Logo.png') }}" alt="Logo"></a>
+                    
+                                   
+        </div>
+        <nav>
+            <ul class="nav-links">
+                 {% if app.user is not null %}
+                    <li><a href="/">Accueil</a></li>
+                    <li><a href="/logout">Se déconnecter</a></li>
+                 {% else %}
+                    <li><a href="/" >Accueil</a></li>
+                    <li><a href="/login">Se connecter</a></li>
+                    <li><a href="/register">S'inscrire</a></li>
+                 {% endif %}
+            </ul>
+        </nav>
+
+    </div>
+</header>
+<main>
+    <h1>Leçons pour la formation : {{ formation.title }}</h1>
+
+    {% if lessons is empty %}
+        <p>Aucune leçon disponible pour cette formation.</p>
+    {% else %}
+        <div class="lessons-container">
+            {% for lesson in lessons %}
+                <div class="lesson-card">
+                    <h2>{{ lesson.title }}</h2>
+                    {# <a href="{{ path('app_buy_lesson', {'id': lesson.id}) }}" class="btn">Acheter la leçon</a> #}
+                    <a class="btn">Acheter la leçon</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</main>
+{% endblock %}

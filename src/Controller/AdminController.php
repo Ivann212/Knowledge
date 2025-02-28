@@ -11,6 +11,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\Theme;
+use App\Form\ThemeType;
 
 final class AdminController extends AbstractController
 {
@@ -20,7 +22,6 @@ final class AdminController extends AbstractController
         return $this->render('admin/index.html.twig');
     }
 
-    // Page pour ajouter un cursus (Formation)
     #[Route('/admin/formations/add', name: 'admin_formations_add')]
     public function addFormation(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -29,7 +30,18 @@ final class AdminController extends AbstractController
     
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            // La relation avec Theme est gérée automatiquement via le formulaire
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+
+            if ($imageFile) {
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $imageFile->move(
+                    $this->getParameter('images_directory'),
+                    $newFilename
+                );
+                $formation->setImage($newFilename); 
+            }
+
             $entityManager->persist($formation);
             $entityManager->flush();
     
@@ -43,7 +55,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    // Page pour ajouter une leçon
+  
     #[Route('/admin/lessons/add', name: 'admin_lessons_add')]
     public function addLesson(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -65,13 +77,50 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    // Page pour gérer les utilisateurs
+ 
     #[Route('/admin/users', name: 'admin_users')]
     public function manageUsers(): Response
     {
-        // Logique pour gérer les utilisateurs
+        // logique pour gerer les utilisateurs
         return $this->render('admin/users/manage.html.twig');
     }
 
+    #[Route('/admin/theme/add', name: 'admin_theme_add')]
+    public function addTheme(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $theme = new Theme();
+        $form = $this->createForm(ThemeType::class, $theme);
+        
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $imageFile->move(
+                    $this->getParameter('images_directory'), 
+                    $newFilename
+                );
+                $theme->setImage($newFilename); 
+            }
+            
+            
+            $entityManager->persist($theme);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Thème ajouté avec succès !');
+            
+            
+            return $this->redirectToRoute('app_admin');  
+        }
+
+        return $this->render('admin/theme/add.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+
+    
 
 }

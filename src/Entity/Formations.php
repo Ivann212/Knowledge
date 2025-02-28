@@ -18,15 +18,18 @@ class Formations
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[ORM\Column(type: "text", nullable: true)]
-    private ?string $description = null;
-
     #[ORM\OneToMany(mappedBy: "formation", targetEntity: Lessons::class)]
     private Collection $lessons;
 
     #[ORM\ManyToOne(targetEntity: Theme::class, inversedBy: 'formations')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Theme $theme = null;
+
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
+    private ?string $price = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
 
     public function __construct()
     {
@@ -46,17 +49,6 @@ class Formations
     public function setTitle(string $title): static
     {
         $this->title = $title;
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
         return $this;
     }
 
@@ -81,7 +73,7 @@ class Formations
     public function removeLesson(Lessons $lesson): static
     {
         if ($this->lessons->removeElement($lesson)) {
-            // set the owning side to null (unless already changed)
+            
             if ($lesson->getFormation() === $this) {
                 $lesson->setFormation(null);
             }
@@ -98,6 +90,27 @@ class Formations
     public function setTheme(?Theme $theme): static
     {
         $this->theme = $theme;
+        return $this;
+    }
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?string $price): static
+    {
+        $this->price = $price;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 }
