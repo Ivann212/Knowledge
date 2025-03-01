@@ -1,4 +1,3 @@
-
 parameters:
     images_directory: '%kernel.project_dir%/public/images'
     stripe_public_key: '%env(STRIPE_PUBLIC_KEY)%'
@@ -7,19 +6,19 @@ parameters:
 services:
 
     _defaults:
-        autowire: true     
-        autoconfigure: true 
+        autowire: true
+        autoconfigure: true
 
-   
-    App\:
-        resource: '../src/'
-        exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
-            - '../src/Kernel.php'
+    # Configuration pour StripeClient
+    stripe.client:
+        class: Stripe\StripeClient
+        arguments: []
 
-    
     App\Service\StripeService:
         arguments:
-            $stripe_public_key: '%stripe_public_key%'
-            $stripe_secret_key: '%stripe_secret_key%'
+            $stripe: '@stripe.client'  # Injecte le service Stripe client
+            $userRepository: '@App\Repository\UserRepository'
+            $purchasesRepository: '@App\Repository\PurchasesRepository'
+            $lessonsRepository: '@App\Repository\LessonsRepository'
+            $formationsRepository: '@App\Repository\FormationsRepository'
+            $session: '@session'

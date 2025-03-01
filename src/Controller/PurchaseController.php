@@ -1,141 +1,73 @@
 <?php
 
-
 namespace App\Controller;
 
-use App\Service\StripeService;
-use App\Entity\Purchases;
-use App\Entity\User;
-use App\Entity\Formations;
 use App\Entity\Lessons;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Formations;
+use App\Repository\LessonsRepository;
+use App\Repository\FormationsRepository;
+use App\Service\StripeService;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Entity\User;  
 
 class PurchaseController extends AbstractController
 {
     private StripeService $stripeService;
-    private EntityManagerInterface $entityManager;
+    private LessonsRepository $lessonsRepository;
+    private FormationsRepository $formationsRepository;
 
-    public function __construct(StripeService $stripeService, EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        StripeService $stripeService,
+        LessonsRepository $lessonsRepository,
+        FormationsRepository $formationsRepository
+    ) {
         $this->stripeService = $stripeService;
-        $this->entityManager = $entityManager;
+        $this->lessonsRepository = $lessonsRepository;
+        $this->formationsRepository = $formationsRepository;
     }
 
-    #[Route('/purchase/{type}/{id}', name: 'purchase')]
-    public function purchase(string $type, int $id, Request $request)
+    #[Route('/purchase/{productId}/{type}', name: 'purchase')]
+    public function purchase(int $productId, string $type): RedirectResponse
     {
-        $user = $this->getUser(); // Assurez-vous que l'utilisateur est authentifié
+        $user = $this->getUser();
 
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
+        // Récupérer le produit en fonction du type
+        $product = match ($type) {
+            'lesson' => $this->lessonsRepository->find($productId),
+            'formation' => $this->formationsRepository->find($productId),
+            default => throw $this->createNotFoundException('Type de produit invalide.')
+        };
+
+        if (!$product) {
+            throw $this->createNotFoundException('Produit non trouvé.');
         }
 
-        if ($type === 'formation') {
-            $formation = $this->entityManager->getRepository(Formations::class)->find($id);
-            if (!$formation) {
-                throw $this->createNotFoundException('Formation non trouvée');
-            }
+        // Créer la session Stripe
+        $sessionUrl = $this->stripeService->createCheckoutSession($user->getId(), $product, $type);
 
-            // Créez une session de paiement pour la formation entière
-            $lineItems = [];
-            foreach ($formation->getLessons() as $lesson) {
-                $lineItems[] = [
-                    'price_data' => [
-                        'currency' => 'eur',
-                        'product_data' => [
-                            'name' => $lesson->getTitle(),
-                        ],
-                        'unit_amount' => $lesson->getPrice() * 100, 
-                    ],
-                    'quantity' => 1,
-                ];
-            }
-
-            // Créez la session Stripe
-            $checkoutSession = $this->stripeService->createCheckoutSession(
-                $lineItems,
-                $this->generateUrl('purchase_success', [], 0), 
-                $this->generateUrl('purchase_cancel', [], 0) 
-            );
-
-            return $this->redirect($checkoutSession->url);
-        }
-
-        if ($type === 'lesson') {
-            $lesson = $this->entityManager->getRepository(Lessons::class)->find($id);
-            if (!$lesson) {
-                throw $this->createNotFoundException('Leçon non trouvée');
-            }
-
-            // Créez une session de paiement pour une seule leçon
-            $lineItems = [
-                [
-                    'price_data' => [
-                        'currency' => 'eur',
-                        'product_data' => [
-                            'name' => $lesson->getTitle(),
-                        ],
-                        'unit_amount' => $lesson->getPrice() * 100, 
-                    ],
-                    'quantity' => 1,
-                ]
-            ];
-
-
-            $checkoutSession = $this->stripeService->createCheckoutSession(
-                $lineItems,
-                $this->generateUrl('purchase_success', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                $this->generateUrl('purchase_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL)
-            );
-
-
-            return $this->redirect($checkoutSession->url);
-        }
-
-        // Gérer le cas où le type n'est ni une formation ni une leçon
-        throw $this->createNotFoundException('Type d\'achat non valide');
+        return $this->redirect($sessionUrl);
     }
 
-    #[Route('/purchase/success', name: 'purchase_success')]
+    #[Route('/success', name: 'purchase_success')]
     public function success(Request $request)
     {
-        // Logique pour associer l'achat à l'utilisateur après paiement réussi
-        // Rediriger l'utilisateur vers la page de succès ou la liste des achats
-        $this->addFlash('success', 'Votre paiement a été validé avec succès ! 🎉');
-        return $this->redirectToRoute('app_home');
+        $sessionId = $request->query->get('session_id');
+
+        if (!$sessionId) {
+            throw $this->createNotFoundException('Session Stripe introuvable.');
+        }
+
+        $this->stripeService->handleStripeCallback($sessionId);
+
+        return $this->render('purchase/success.html.twig');
     }
 
-    #[Route('/purchase/cancel', name: 'purchase_cancel')]
+    #[Route('/cancel', name: 'purchase_cancel')]
     public function cancel()
     {
-        $this->addFlash('error', 'Votre paiement a été annulé. ❌');
-        return $this->redirectToRoute('app_home');
+        return $this->render('purchase/cancel.html.twig');
     }
-
-    public function recordPurchase($user, $price , $formation = null, $lesson = null)
-    {
-        $purchase = new Purchases();
-        $purchase->setUser($user);
-        $purchase->setPrice($price);
-
-        if ($formation) {
-            $purchase->setFormation($formation);
-            // Associez toutes les leçons de la formation à l'achat
-            foreach ($formation->getLessons() as $lesson) {
-                // Logique pour associer la leçon à l'achat
-            }
-        }
-
-        if ($lesson) {
-            $purchase->setLesson($lesson);
-        }
-
-        $this->entityManager->persist($purchase);
-        $this->entityManager->flush();
-    }
-
 }
