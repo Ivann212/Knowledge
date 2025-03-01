@@ -43,7 +43,9 @@
                     <p><strong>Prix :</strong> {{ formation.price }} €</p>
                     {# <a href="{{ path('app_formation', {'id': formation.id}) }}">Voir la formation</a> #}
                     <a href="{{ path('app_formations', {'id': formation.id}) }}" class="btn">Voir les leçons</a>
-                    <a class="btn">Acheter le cursus</a>
+                    <form action="{{ path('purchase', { 'type': 'formation', 'id': formation.id }) }}" method="POST">
+                        <button type="submit">Payer la formation</button>
+                    </form>
                 </div>
             {% endfor %}
         </div>

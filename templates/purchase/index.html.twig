@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Acheter la Formation{% endblock %}
+
+{% block body %}
+    <h1>{{ formation.title }}</h1>
+    <p>{{ formation.description }}</p>
+    <p>Prix : {{ formation.price }} €</p>
+
+    <form action="{{ path('purchase', { 'type': 'formation', 'id': formation.id }) }}" method="POST">
+        <button type="submit">Payer pour la formation</button>
+    </form>
+
+{% endblock %}

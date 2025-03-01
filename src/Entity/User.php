@@ -42,11 +42,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: "user", targetEntity: Certifications::class, cascade: ["persist", "remove"])]
     private Collection $certifications;
 
+    #[ORM\ManyToMany(targetEntity: Formations::class)]
+    #[ORM\JoinTable(name: 'user_formations')]
+    private Collection $purchasedFormations;
+
+    #[ORM\ManyToMany(targetEntity: Lessons::class)]
+    #[ORM\JoinTable(name: 'user_lessons')]
+    private Collection $purchasedLessons;
+
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
         $this->progress = new ArrayCollection();
         $this->certifications = new ArrayCollection();
+        $this->purchasedFormations = new ArrayCollection();
+        $this->purchasedLessons = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -73,7 +83,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = 'ROLE_ADMIN';
+        $roles[] = 'ROLE_USER';
         return array_unique($roles);
     }
 
@@ -177,6 +187,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($certification->getUser() === $this) {
                 $certification->setUser(null);
             }
+        }
+        return $this;
+    }
+
+    public function getPurchasedFormations(): Collection
+    {
+        return $this->purchasedFormations;
+    }
+
+    public function addPurchasedFormation(Formations $formation): self
+    {
+        if (!$this->purchasedFormations->contains($formation)) {
+            $this->purchasedFormations[] = $formation;
+        }
+        return $this;
+    }
+
+    public function getpurchasedLessons(): Collection
+    {
+        return $this->purchasedLessons;
+    }
+
+    public function addpurchasedLessons(Formations $formations): self
+    {
+        if (!$this->purchasedLessons->contains($formations)) {
+            $this->purchasedLessons[] = $formations;
         }
         return $this;
     }

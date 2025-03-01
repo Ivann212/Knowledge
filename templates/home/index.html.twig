@@ -32,18 +32,25 @@
     </div>
 </header>
 <main>
-    <h1>Les différentes formations</h1>
-    <div class="themes-container">
-        {% for theme in themes %}
-            <div class="theme-card">
-                
-                <a href="{{ path('app_theme', {'id': theme.id}) }}">
-                    <img src="{{ asset('images/' ~ theme.image) }}" alt="{{ theme.name }}">
 
-                    <h3>{{ theme.name }}</h3>
-                </a>
-            </div>
-        {% endfor %}
-    </div>
+
+    {% if app.user is not null %}
+        <h1>Les différentes formations</h1>
+        <div class="themes-container">
+            {% for theme in themes %}
+                <div class="theme-card">
+                    
+                    <a href="{{ path('app_theme', {'id': theme.id}) }}">
+                        <img src="{{ asset('images/' ~ theme.image) }}" alt="{{ theme.name }}">
+
+                        <h3>{{ theme.name }}</h3>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+                <h1>Veuillez vous <a href="/login">connecter</a> ou <a href="/register">créer un compte</a> pour voir les différentes formation</h1>
+    {% endif %}
+    
 </main>
 {% endblock %}

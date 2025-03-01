@@ -41,7 +41,9 @@
                 <div class="lesson-card">
                     <h2>{{ lesson.title }}</h2>
                     {# <a href="{{ path('app_buy_lesson', {'id': lesson.id}) }}" class="btn">Acheter la leçon</a> #}
-                    <a class="btn">Acheter la leçon</a>
+                    <form action="{{ path('purchase', { 'type': 'formation', 'id': formation.id }) }}" method="POST">
+                        <button type="submit">Payer la leçon</button>
+                    </form>
                 </div>
             {% endfor %}
         </div>
