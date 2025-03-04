@@ -2,72 +2,98 @@
 
 namespace App\Controller;
 
-use App\Entity\Lessons;
-use App\Entity\Formations;
-use App\Repository\LessonsRepository;
-use App\Repository\FormationsRepository;
 use App\Service\StripeService;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Entity\User;  
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\FormationsRepository;
+use App\Repository\LessonsRepository;
+use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
+
+use App\Entity\Formations;
+use App\Entity\Lessons;
+use App\Repository\UserRepository;
 
 class PurchaseController extends AbstractController
 {
-    private StripeService $stripeService;
-    private LessonsRepository $lessonsRepository;
-    private FormationsRepository $formationsRepository;
-
-    public function __construct(
-        StripeService $stripeService,
-        LessonsRepository $lessonsRepository,
-        FormationsRepository $formationsRepository
-    ) {
-        $this->stripeService = $stripeService;
-        $this->lessonsRepository = $lessonsRepository;
-        $this->formationsRepository = $formationsRepository;
-    }
-
-    #[Route('/purchase/{productId}/{type}', name: 'purchase')]
-    public function purchase(int $productId, string $type): RedirectResponse
-    {
-        $user = $this->getUser();
-
-        // Récupérer le produit en fonction du type
-        $product = match ($type) {
-            'lesson' => $this->lessonsRepository->find($productId),
-            'formation' => $this->formationsRepository->find($productId),
-            default => throw $this->createNotFoundException('Type de produit invalide.')
-        };
-
-        if (!$product) {
-            throw $this->createNotFoundException('Produit non trouvé.');
+    #[Route('/paiement/create-session/{type}/{id}', name: 'create_checkout_session', methods: ['POST'])]
+    public function createSession(
+        string $type, 
+        int $id, 
+        FormationsRepository $formationsRepository, 
+        LessonsRepository $lessonsRepository, 
+        StripeService $stripeService
+    ): JsonResponse {
+        if ($type === 'formation') {
+            $item = $formationsRepository->find($id);
+        } elseif ($type === 'lesson') {
+            $item = $lessonsRepository->find($id);
+        } else {
+            return new JsonResponse(['error' => 'Type de produit invalide'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Créer la session Stripe
-        $sessionUrl = $this->stripeService->createCheckoutSession($user->getId(), $product, $type);
-
-        return $this->redirect($sessionUrl);
-    }
-
-    #[Route('/success', name: 'purchase_success')]
-    public function success(Request $request)
-    {
-        $sessionId = $request->query->get('session_id');
-
-        if (!$sessionId) {
-            throw $this->createNotFoundException('Session Stripe introuvable.');
+        if (!$item) {
+            return new JsonResponse(['error' => ucfirst($type) . ' non trouvée'], Response::HTTP_NOT_FOUND);
         }
 
-        $this->stripeService->handleStripeCallback($sessionId);
+        $lineItems = [[
+            'price_data' => [
+                'currency' => 'eur',
+                'product_data' => [
+                    'name' => $item->getTitle(),
+                ],
+                'unit_amount' => $item->getPrice() * 100, 
+            ],
+            'quantity' => 1,
+        ]];
 
-        return $this->render('purchase/success.html.twig');
+        $session = $stripeService->createCheckoutSession(
+            $lineItems,
+            'http://127.0.0.1:8000/success/' . $type . '/' . $id,
+            'http://127.0.0.1:8000/cancel'
+        );
+
+        return new JsonResponse(['id' => $session->id]);
     }
 
-    #[Route('/cancel', name: 'purchase_cancel')]
-    public function cancel()
-    {
-        return $this->render('purchase/cancel.html.twig');
+
+    #[Route('/success/{type}/{id}', name: 'payment_success')]
+    public function paymentSuccess(
+        string $type, 
+        int $id, 
+        EntityManagerInterface $em, 
+        FormationsRepository $formationsRepository, 
+        LessonsRepository $lessonsRepository
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser(); // Symfony sait que c'est un User, mais ton IDE peut ne pas le reconnaître
+
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté.');
+        }
+
+        if ($type === 'formation') {
+            $item = $formationsRepository->find($id);
+            $user->addPurchasedFormation($item); // Maintenant, l'IDE reconnaît bien cette méthode
+        } elseif ($type === 'lesson') {
+            $item = $lessonsRepository->find($id);
+            $user->addPurchasedLesson($item); // Pareil ici
+        } else {
+            throw $this->createNotFoundException('Type invalide.');
+        }
+
+        // Ajout du rôle 'ROLE_CLIENT'
+        $user->setRoles(['ROLE_CLIENT']);
+        
+        $em->persist($user);
+        $em->flush();
+
+        return $this->render('home/success.html.twig', [
+            'item' => $item,
+            'type' => $type
+        ]);
     }
+
 }

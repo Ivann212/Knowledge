@@ -1,24 +1,25 @@
+# config/services.yaml
+
 parameters:
     images_directory: '%kernel.project_dir%/public/images'
     stripe_public_key: '%env(STRIPE_PUBLIC_KEY)%'
     stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
 
 services:
-
     _defaults:
         autowire: true
         autoconfigure: true
 
-    # Configuration pour StripeClient
-    stripe.client:
-        class: Stripe\StripeClient
-        arguments: []
+    # Chargement automatique des services
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
 
+    # Déclaration explicite du service Stripe
     App\Service\StripeService:
         arguments:
-            $stripe: '@stripe.client'  # Injecte le service Stripe client
-            $userRepository: '@App\Repository\UserRepository'
-            $purchasesRepository: '@App\Repository\PurchasesRepository'
-            $lessonsRepository: '@App\Repository\LessonsRepository'
-            $formationsRepository: '@App\Repository\FormationsRepository'
-            $session: '@session'
+            $stripe_public_key: '%stripe_public_key%'
+            $stripe_secret_key: '%stripe_secret_key%'

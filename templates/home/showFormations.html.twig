@@ -1,37 +1,37 @@
+
 {% extends 'home/index.html.twig' %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/home.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/showFormations.css') }}">
 {% endblock %}
+
 {% block title %}Formations pour {{ theme.name }}{% endblock %}
 
 {% block body %}
-
 <header>
     <div class="container">
         <div class="logo">
             <a href="/" class="logo-link"><img src="{{ asset('images/Logo.png') }}" alt="Logo"></a>
-                    
-                                   
         </div>
         <nav>
             <ul class="nav-links">
-                 {% if app.user is not null %}
+                {% if app.user is not null %}
                     <li><a href="/">Accueil</a></li>
                     <li><a href="/logout">Se déconnecter</a></li>
-                 {% else %}
-                    <li><a href="/" >Accueil</a></li>
+                {% else %}
+                    <li><a href="/">Accueil</a></li>
                     <li><a href="/login">Se connecter</a></li>
                     <li><a href="/register">S'inscrire</a></li>
-                 {% endif %}
+                {% endif %}
             </ul>
         </nav>
-
     </div>
 </header>
+
 <main>
     <h1>Formations pour le thème : {{ theme.name }}</h1>
+    
     {% if formations is empty %}
         <p>Aucune formation disponible pour ce thème.</p>
     {% else %}
@@ -41,14 +41,47 @@
                     <img src="{{ asset('images/' ~ formation.image) }}" alt="Image de {{ formation.title }}" class="formation-image">
                     <h2>{{ formation.title }}</h2>
                     <p><strong>Prix :</strong> {{ formation.price }} €</p>
-                    {# <a href="{{ path('app_formation', {'id': formation.id}) }}">Voir la formation</a> #}
                     <a href="{{ path('app_formations', {'id': formation.id}) }}" class="btn">Voir les leçons</a>
-                    <form action="{{ path('purchase', { 'type': 'formation', 'id': formation.id }) }}" method="POST">
-                        <button type="submit">Payer la formation</button>
-                    </form>
+                    
+                    
+                    
+
+                    {% if formationsAccess[formation.id] %}
+                        <a href="{{ path('app_formations', { id: formation.id }) }}" class="btn btn-success">Accéder</a>
+                    {% else %}
+                        <button class="btn btn-primary checkout-button" data-type="formation" data-id="{{ formation.id }}">
+                            Payer la formation
+                        </button>
+                    {% endif %}
+                   
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 </main>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.querySelectorAll(".checkout-button").forEach(button => {
+    button.addEventListener("click", function () {
+        let type = this.getAttribute("data-type");
+        let id = this.getAttribute("data-id");
+
+        fetch(`/paiement/create-session/${type}/${id}`, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(session => {
+            if (session.error) {
+                alert(session.error);
+                return;
+            }
+            var stripe = Stripe("{{ stripe_public_key }}");
+            stripe.redirectToCheckout({ sessionId: session.id });
+        });
+    });
+});
+</script>
+
+
 {% endblock %}

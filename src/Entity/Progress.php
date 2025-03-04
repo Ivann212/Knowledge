@@ -24,6 +24,11 @@ class Progress
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\ManyToOne(targetEntity: Formations::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Formations $formation = null;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -61,4 +66,16 @@ class Progress
         $this->lesson = $lesson;
         return $this;
     }
+
+    public function getFormation(): ?Formations
+    {
+        return $this->formation;
+    }
+
+    public function setFormation(?Formations $formation): static
+    {
+        $this->formation = $formation;
+        return $this;
+    }
+
 }

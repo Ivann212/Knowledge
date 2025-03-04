@@ -50,6 +50,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinTable(name: 'user_lessons')]
     private Collection $purchasedLessons;
 
+    #[ORM\ManyToMany(targetEntity: Formations::class)]
+    #[ORM\JoinTable(name: "user_completed_formations")]
+    private Collection $completedFormations;
+
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
@@ -57,6 +61,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->certifications = new ArrayCollection();
         $this->purchasedFormations = new ArrayCollection();
         $this->purchasedLessons = new ArrayCollection();
+        $this->completedFormations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -209,11 +214,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->purchasedLessons;
     }
 
-    public function addpurchasedLessons(Formations $formations): self
+    public function addPurchasedLesson(Lessons $lesson): self
     {
-        if (!$this->purchasedLessons->contains($formations)) {
-            $this->purchasedLessons[] = $formations;
+        if (!$this->purchasedLessons->contains($lesson)) {
+            $this->purchasedLessons[] = $lesson;
         }
         return $this;
     }
+
+    public function getCompletedFormations(): Collection
+    {
+        return $this->completedFormations;
+    }
+
+    public function addCompletedFormation(Formations $formation): self
+    {
+        if (!$this->completedFormations->contains($formation)) {
+            $this->completedFormations->add($formation);
+        }
+
+        return $this;
+    }
+
 }

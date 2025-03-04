@@ -40,13 +40,42 @@
             {% for lesson in lessons %}
                 <div class="lesson-card">
                     <h2>{{ lesson.title }}</h2>
-                    {# <a href="{{ path('app_buy_lesson', {'id': lesson.id}) }}" class="btn">Acheter la leçon</a> #}
-                    <form action="{{ path('purchase', { 'type': 'formation', 'id': formation.id }) }}" method="POST">
-                        <button type="submit">Payer la leçon</button>
-                    </form>
+                    
+                    {% if hasAccessToLesson[lesson.id] %}
+                        <a href="{{ path('lesson_show', { id: lesson.id }) }}" class="btn btn-success">Accéder</a>
+                    {% else %}
+                        <button class="btn btn-primary checkout-button" data-type="lesson" data-id="{{ lesson.id }}">
+                            Acheter cette leçon
+                        </button>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 </main>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.querySelectorAll(".checkout-button").forEach(button => {
+    button.addEventListener("click", function () {
+        let type = this.getAttribute("data-type");
+        let id = this.getAttribute("data-id");
+
+        fetch(`/paiement/create-session/${type}/${id}`, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(session => {
+            if (session.error) {
+                alert(session.error);
+                return;
+            }
+            var stripe = Stripe("{{ stripe_public_key }}");
+            stripe.redirectToCheckout({ sessionId: session.id });
+        });
+    });
+});
+</script>
+
+
 {% endblock %}

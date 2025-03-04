@@ -21,12 +21,23 @@ class Purchases
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Lessons::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Lessons $lesson = null;
 
     #[ORM\ManyToOne(targetEntity: Formations::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Formations $formation = null;
+
+    #[ORM\Column(type: 'string', length: 20)]
+    private string $status = 'pending'; // Statut par défaut
+
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $createdAt;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -75,5 +86,37 @@ class Purchases
     {
         $this->formation = $formation;
         return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getCreatedAt(): \DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function isLessonPurchase(): bool
+    {
+        return $this->lesson !== null;
+    }
+
+    public function isFormationPurchase(): bool
+    {
+        return $this->formation !== null;
     }
 }
