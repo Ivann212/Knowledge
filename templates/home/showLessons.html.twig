@@ -41,13 +41,16 @@
                 <div class="lesson-card">
                     <h2>{{ lesson.title }}</h2>
                     
-                    {% if hasAccessToLesson[lesson.id] %}
-                        <a href="{{ path('lesson_show', { id: lesson.id }) }}" class="btn btn-success">Accéder</a>
+                    {% if hasAccessToLesson %}
+                        <a href="{{ path('lesson_show', { id: lesson.id }) }}" class="btn btn-success">Accéder à la leçon</a>
                     {% else %}
                         <button class="btn btn-primary checkout-button" data-type="lesson" data-id="{{ lesson.id }}">
                             Acheter cette leçon
                         </button>
                     {% endif %}
+                    <button class="btn btn-primary checkout-button" data-type="lesson" data-id="{{ lesson.id }}">
+                        Acheter cette leçon
+                    </button>
                 </div>
             {% endfor %}
         </div>

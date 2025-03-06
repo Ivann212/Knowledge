@@ -12,9 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 
-use App\Entity\Formations;
-use App\Entity\Lessons;
-use App\Repository\UserRepository;
 
 class PurchaseController extends AbstractController
 {
@@ -68,7 +65,7 @@ class PurchaseController extends AbstractController
         LessonsRepository $lessonsRepository
     ): Response {
         /** @var User $user */
-        $user = $this->getUser(); // Symfony sait que c'est un User, mais ton IDE peut ne pas le reconnaître
+        $user = $this->getUser(); 
 
         if (!$user) {
             throw $this->createAccessDeniedException('Vous devez être connecté.');
@@ -76,16 +73,15 @@ class PurchaseController extends AbstractController
 
         if ($type === 'formation') {
             $item = $formationsRepository->find($id);
-            $user->addPurchasedFormation($item); // Maintenant, l'IDE reconnaît bien cette méthode
+            $user->addPurchasedFormation($item); 
         } elseif ($type === 'lesson') {
             $item = $lessonsRepository->find($id);
-            $user->addPurchasedLesson($item); // Pareil ici
+            $user->addPurchasedLesson($item); 
         } else {
             throw $this->createNotFoundException('Type invalide.');
         }
 
-        // Ajout du rôle 'ROLE_CLIENT'
-        $user->setRoles(['ROLE_CLIENT']);
+        
         
         $em->persist($user);
         $em->flush();

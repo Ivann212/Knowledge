@@ -20,7 +20,7 @@ class StripeService
     {
         return $this->stripe->checkout->sessions->create([
             'payment_method_types' => ['card'],
-            'line_items' => $lineItems, // Correction ici
+            'line_items' => $lineItems, 
             'mode' => 'payment',
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,

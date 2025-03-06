@@ -184,7 +184,7 @@ final class HomeController extends AbstractController
                 'lesson' => $lessonItem
             ]);
 
-            if ($progress && $progress->isComplete()) {  // Utilise isComplete() ici
+            if ($progress && $progress->isComplete()) {  
                 $completedLessonsCount++;
             }
         }

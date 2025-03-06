@@ -36,7 +36,7 @@ class FormationsType extends AbstractType
             ])
             ->add('image', FileType::class, [
                 'label' => 'Image de la formation',
-                'mapped' => false, // Car ce n'est pas un champ de l'entité
+                'mapped' => false, 
                 'required' => false,
                 'constraints' => [
                     new File([
