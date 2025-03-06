@@ -72,26 +72,27 @@ final class HomeController extends AbstractController
             throw $this->createNotFoundException('La formation demandée n\'existe pas.');
         }
 
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user || !$user->getPurchasedFormations()->contains($formation)) {
-            $this->addFlash('error', 'Vous devez acheter cette formation pour y accéder.');
-            return $this->redirectToRoute('app_home');
-        }
+        // Vérifie si l'utilisateur a acheté la formation
+        $hasPurchasedFormation = $user && $user->getPurchasedFormations()->contains($formation);
 
-        $hasAccessToLesson = [];
+        // Vérifie l'accès à chaque leçon individuellement
+        $lessonsAccess = [];
         foreach ($formation->getLessons() as $lesson) {
-            $hasAccessToLesson[$lesson->getId()] = true; // L'utilisateur a accès aux leçons de sa formation achetée
+            $lessonsAccess[$lesson->getId()] = $hasPurchasedFormation || ($user && $user->getPurchasedLessons()->contains($lesson));
         }
 
         return $this->render('home/showLessons.html.twig', [
             'formation' => $formation,
             'lessons' => $formation->getLessons(),
-            'hasAccessToLesson' => $hasAccessToLesson,
+            'hasPurchasedFormation' => $hasPurchasedFormation,
+            'lessonsAccess' => $lessonsAccess,
             'stripe_public_key' => $stripePublicKey,
         ]);
     }
+
 
 
 
@@ -209,12 +210,4 @@ final class HomeController extends AbstractController
 
         return $this->redirectToRoute('lesson_show', ['id' => $id]);
     }
-
-
-
-
-
-
-
-
 }
