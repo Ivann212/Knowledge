@@ -54,6 +54,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinTable(name: "user_completed_formations")]
     private Collection $completedFormations;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $updatedBy = null;
+
+
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
@@ -232,6 +247,75 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if (!$this->completedFormations->contains($formation)) {
             $this->completedFormations->add($formation);
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function removePurchasedFormation(Formations $purchasedFormation): static
+    {
+        $this->purchasedFormations->removeElement($purchasedFormation);
+
+        return $this;
+    }
+
+    public function removePurchasedLesson(Lessons $purchasedLesson): static
+    {
+        $this->purchasedLessons->removeElement($purchasedLesson);
+
+        return $this;
+    }
+
+    public function removeCompletedFormation(Formations $completedFormation): static
+    {
+        $this->completedFormations->removeElement($completedFormation);
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?self
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?self $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?self
+    {
+        return $this->updatedBy;
+    }
+
+    public function setUpdatedBy(?self $updatedBy): static
+    {
+        $this->updatedBy = $updatedBy;
 
         return $this;
     }

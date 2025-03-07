@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\LessonsRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -28,12 +29,20 @@ class Lessons
     #[ORM\Column(length: 255)]
     private ?string $video_url = null;
 
-    #[ORM\Column(nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
-    private ?\DateTimeImmutable $created_at = null;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updated_at = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $updatedBy = null;
+
 
     #[ORM\ManyToOne(targetEntity: Formations::class, inversedBy: "lessons")]
     #[ORM\JoinColumn(nullable: false)]
@@ -49,8 +58,7 @@ class Lessons
     {
         $this->progress = new ArrayCollection();
         $this->certifications = new ArrayCollection();
-        $this->created_at = new \DateTimeImmutable();
-        $this->updated_at = new \DateTimeImmutable();
+        
 
 
     }
@@ -101,28 +109,6 @@ class Lessons
     public function setVideoUrl(string $video_url): static
     {
         $this->video_url = $video_url;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
-    {
-        $this->created_at = $created_at;
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
-    {
-        $this->updated_at = $updated_at;
         return $this;
     }
 
@@ -195,20 +181,52 @@ class Lessons
         return $this;
     }
 
-    /**
-     *
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     */
-    public function updatedTimestamps(): void
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
-        $this->setUpdatedAt(new \DateTimeImmutable('now'));
-        if (!$this->created_at) {
-            $this->created_at = new \DateTimeImmutable();
-        }
-        if (!$this->updated_at) {
-            $this->updated_at = new \DateTimeImmutable();
-        }
-        
+        return $this->createdAt;
     }
+
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?User
+    {
+        return $this->updatedBy;
+    }
+
+    public function setUpdatedBy(?User $updatedBy): static
+    {
+        $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
 }
